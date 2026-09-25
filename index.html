@@ -36,9 +36,13 @@ main{padding:14px 16px 90px; max-width:1100px; margin:0 auto;}
 .summary b{color:var(--text);}
 .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px;}
 .card{background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; display:flex; flex-direction:column;}
-.thumb{aspect-ratio:1/1; background:var(--chip); display:flex; align-items:center; justify-content:center; overflow:hidden;}
+.thumb{aspect-ratio:1/1; background:var(--chip); display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:default;}
+.thumb.clickable{cursor:zoom-in;}
 .thumb img{width:100%; height:100%; object-fit:cover;}
 .thumb .ph{color:var(--sub); font-size:28px;}
+.lightbox{position:fixed; inset:0; background:rgba(0,0,0,.85); display:flex; align-items:center; justify-content:center; z-index:40; padding:24px;}
+.lightbox img{max-width:min(90vw,420px); max-height:80vh; border-radius:12px; background:#fff;}
+.lightbox .lbclose{position:absolute; top:calc(16px + env(safe-area-inset-top,0px)); right:16px; background:rgba(255,255,255,.15); color:#fff; border:none; width:36px; height:36px; border-radius:999px; font-size:18px; cursor:pointer;}
 .cbody{padding:10px; display:flex; flex-direction:column; gap:4px; flex:1;}
 .ccode{font-size:11px; color:var(--sub); font-family:monospace;}
 .cname{font-size:13px; font-weight:600; line-height:1.3;}
@@ -210,7 +214,7 @@ function render(){
     card.className = 'card';
     const qc = qtyClass(p.qty);
     card.innerHTML = `
-      <div class="thumb">${p.img ? `<img src="${p.img.startsWith('data:')?p.img:'data:image/jpeg;base64,'+p.img}">` : `<div class="ph">🥤</div>`}</div>
+      <div class="thumb${p.img ? ' clickable' : ''}" ${p.img ? `data-lightbox="${p.img.startsWith('data:')?p.img:'data:image/jpeg;base64,'+p.img}"` : ''}>${p.img ? `<img src="${p.img.startsWith('data:')?p.img:'data:image/jpeg;base64,'+p.img}">` : `<div class="ph">🥤</div>`}</div>
       <div class="cbody">
         <div class="ccode">${p.code || p.erp_code || ''}</div>
         <div class="cname">${p.name || ''}</div>
@@ -225,6 +229,10 @@ function render(){
     grid.appendChild(card);
   });
 
+  grid.querySelectorAll('.thumb.clickable').forEach(el => {
+    el.onclick = () => openLightbox(el.dataset.lightbox);
+  });
+
   grid.querySelectorAll('button[data-act]').forEach(btn => {
     btn.onclick = () => {
       const item = products.find(p => p.id === btn.dataset.id);
@@ -232,6 +240,14 @@ function render(){
       else if(btn.dataset.act === 'del') deleteItem(item);
     };
   });
+}
+
+function openLightbox(src){
+  const lb = document.createElement('div');
+  lb.className = 'lightbox';
+  lb.innerHTML = `<button class="lbclose">✕</button><img src="${src}">`;
+  lb.onclick = (e) => { if(e.target === lb || e.target.classList.contains('lbclose')) lb.remove(); };
+  document.body.appendChild(lb);
 }
 
 function openModal(item){
