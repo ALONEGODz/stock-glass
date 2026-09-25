@@ -108,6 +108,7 @@ main{padding:20px calc(20px + env(safe-area-inset-right,0px)) 90px 20px;}
 .sectiontitle{font-size:14px; font-weight:700; margin:0 0 12px;}
 .catcards{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px; margin-bottom:24px;}
 .catcard{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px; display:flex; gap:12px; align-items:center;}
+.catcard.active{border-color:var(--mint); box-shadow:0 0 0 2px var(--mint-soft);}
 .catcard .catimg{width:104px; height:104px; border-radius:10px; background:var(--bg); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; font-size:24px;}
 .catcard .catimg img{width:100%; height:100%; object-fit:cover; object-position:center;}
 .catcard .catinfo{flex:1; min-width:0;}
@@ -133,22 +134,38 @@ main{padding:20px calc(20px + env(safe-area-inset-right,0px)) 90px 20px;}
 .toolbar .spacer{flex:1;}
 .toolbar button.addnew{font-size:13px; padding:9px 14px; border-radius:9px; border:none; background:var(--blue); color:var(--blue-ink); font-weight:700; cursor:pointer; white-space:nowrap;}
 
-.pgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:14px; margin-bottom:18px;}
-.pcard{background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; position:relative; display:flex; flex-direction:column;}
+.pgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:14px; margin-bottom:18px;}
+.pcard{background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; position:relative; display:flex; flex-direction:column; padding:12px;}
 .pstatus{position:absolute; top:9px; left:9px; font-size:10px; font-weight:800; padding:3px 9px; border-radius:999px; z-index:2;}
 .pstatus.ok{background:var(--mint-soft); color:var(--mint);}
 .pstatus.low{background:var(--orange-soft); color:var(--orange);}
 .pstatus.zero{background:var(--slate-soft); color:var(--slate);}
-.pimg{aspect-ratio:1/1; background:var(--bg); display:flex; align-items:center; justify-content:center; overflow:hidden;}
+.pkebab{position:absolute; top:8px; right:8px; z-index:3; background:none; border:none; color:var(--sub); font-size:16px; font-weight:800; cursor:pointer; padding:2px 6px; line-height:1;}
+.pkebabmenu{position:absolute; top:30px; right:8px; z-index:5; background:var(--card); border:1px solid var(--border); border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,.15); display:none; overflow:hidden; min-width:110px;}
+.pkebabmenu.show{display:block;}
+.pkebabmenu button{display:block; width:100%; text-align:left; font-size:12.5px; padding:9px 12px; border:none; background:none; color:var(--text); cursor:pointer;}
+.pkebabmenu button:hover{background:var(--bg);}
+.pkebabmenu button.danger{color:#e5484d;}
+.pcardtop{display:flex; gap:10px; margin-bottom:10px;}
+.pimg{width:92px; flex-shrink:0; border-radius:10px; background:var(--bg); display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:default; align-self:stretch;}
 .pimg.clickable{cursor:zoom-in;}
 .pimg img{width:100%; height:100%; object-fit:cover;}
 .pimg .ph{font-size:26px; color:var(--sub);}
-.pbody{padding:11px 12px; display:flex; flex-direction:column; gap:5px; flex:1;}
-.pcode{font-family:monospace; font-size:10.5px; color:var(--sub);}
-.pname{font-weight:700; font-size:12.5px; line-height:1.3;}
-.prow{display:flex; justify-content:space-between; font-size:11.5px; color:var(--sub);}
-.prow b{color:var(--text); font-weight:700;}
+.pinfo{flex:1; min-width:0; display:flex; flex-direction:column; gap:5px; padding-top:2px;}
+.pcode{font-weight:700; font-size:12.5px; line-height:1.3; word-break:break-word;}
+.prow{display:flex; justify-content:space-between; gap:6px; font-size:11.5px; color:var(--sub);}
+.prow b{color:var(--text); font-weight:700; text-align:right;}
 .colordot{display:inline-block; width:9px; height:9px; border-radius:999px; margin-right:5px; border:1px solid rgba(0,0,0,.15); vertical-align:middle;}
+.stockbox{border-top:1px dashed var(--border); padding-top:8px; margin-top:2px; display:flex; flex-direction:column; gap:5px;}
+.stocktitle{font-size:11px; font-weight:700; color:var(--sub); margin-bottom:1px;}
+.stockbox .prow b.qty-ok{color:var(--mint); font-size:14px;}
+.stockbox .prow b.qty-low{color:var(--orange); font-size:14px;}
+.stockbox .prow b.qty-zero{color:var(--slate); font-size:14px;}
+.stockbox .prow b.pendingval{color:var(--orange);}
+.stockbox .prow b.incomingval{color:var(--purple);}
+.pfooter{display:flex; justify-content:space-between; align-items:center; gap:6px; border-top:1px solid var(--border); margin-top:9px; padding-top:8px; font-size:11px; color:var(--sub);}
+.pfooter .datebadge{display:flex; align-items:center; gap:5px;}
+.pfooter .datebadge .dot{width:16px; height:16px; border-radius:999px; background:var(--mint-soft); color:var(--mint); display:inline-flex; align-items:center; justify-content:center; font-size:10px;}
 .dashtoolbar{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;}
 .dashtoolbar select{font-size:13px; padding:8px 10px; border-radius:9px; border:1px solid var(--border); background:var(--card); color:var(--text);}
 .dashthumb{width:44px; height:44px; border-radius:8px; overflow:hidden; background:var(--bg); border:1px solid var(--border);}
@@ -159,13 +176,6 @@ main{padding:20px calc(20px + env(safe-area-inset-right,0px)) 90px 20px;}
 .tqty.ok{color:var(--mint);} .tqty.low{color:var(--orange);} .tqty.zero{color:var(--slate);}
 .iconbtn{width:28px; height:28px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); cursor:pointer; font-size:12px; display:inline-flex; align-items:center; justify-content:center;}
 .iconbtn.danger{color:#e5484d; border-color:#e5484d;}
-.pqtyrow{display:flex; justify-content:space-between; align-items:baseline; padding-top:4px; margin-top:2px; border-top:1px dashed var(--border);}
-.pqtyrow .qlabel{font-size:11px; color:var(--sub);}
-.pqtyrow .qval{font-size:18px; font-weight:800;}
-.qval.ok{color:var(--mint);} .qval.low{color:var(--orange);} .qval.zero{color:var(--slate);}
-.pactions{display:flex; gap:6px; margin-top:6px;}
-.pactions button{flex:1; font-size:11.5px; padding:6px; border-radius:7px; border:1px solid var(--border); background:var(--bg); color:var(--text); cursor:pointer;}
-.pactions button.danger{color:#e5484d; border-color:#e5484d;}
 
 .pager{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:12.5px; color:var(--sub);}
 .pager .pages{display:flex; gap:4px; align-items:center;}
@@ -409,22 +419,14 @@ function render(){
   else renderCategory(view);
 }
 
-function renderDashboard(){
-  const totalQty = products.reduce((s,p)=>s+(p.qty||0),0);
-  const low = products.filter(p=>qtyStatus(p.qty)==='low');
-  const zero = products.filter(p=>qtyStatus(p.qty)==='zero');
-  const totalPending = products.reduce((s,p)=>s+(parseInt(p.pending)||0),0);
-  const totalIncoming = products.reduce((s,p)=>s+(parseInt(p.incoming_qty)||0),0);
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
-
-  const catCardsHtml = CATEGORIES.map(c => {
+function buildCatOverviewCards(activeCat){
+  return CATEGORIES.map(c => {
     const items = itemsFor(c);
     const collage = CAT_COLLAGE[c];
     const withImg = items.find(p=>p.img);
     const qty = items.reduce((s,p)=>s+(p.qty||0),0);
     const imgSrc = collage || (withImg ? toSrc(withImg.img_full||withImg.img) : null);
-    return `<div class="catcard">
+    return `<div class="catcard${c===activeCat?' active':''}">
       <div class="catimg">${imgSrc?`<img src="${imgSrc}">`:'🥤'}</div>
       <div class="catinfo">
         <div class="catname">${c}</div>
@@ -436,6 +438,16 @@ function renderDashboard(){
       </div>
     </div>`;
   }).join('');
+}
+
+function renderDashboard(){
+  const totalQty = products.reduce((s,p)=>s+(p.qty||0),0);
+  const low = products.filter(p=>qtyStatus(p.qty)==='low');
+  const zero = products.filter(p=>qtyStatus(p.qty)==='zero');
+  const totalPending = products.reduce((s,p)=>s+(parseInt(p.pending)||0),0);
+  const totalIncoming = products.reduce((s,p)=>s+(parseInt(p.incoming_qty)||0),0);
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
 
   $('mainContent').innerHTML = `
     <div class="herobanner">
@@ -452,7 +464,7 @@ function renderDashboard(){
       <div class="stat zero"><div class="icon">🔄</div><div><div class="label">รอเติม Stock</div><div class="value">${zero.length.toLocaleString()} <span class="unit">รายการ</span></div></div></div>
     </div>
     <div class="sectiontitle">เลือกตามประเภทสินค้า</div>
-    <div class="catcards">${catCardsHtml}</div>
+    <div class="catcards">${buildCatOverviewCards()}</div>
     <div class="sectiontitle">รายการสต็อกสินค้าทั้งหมด</div>
     <div id="dashTableWrap"></div>
   `;
@@ -764,21 +776,30 @@ function renderCategory(catOrAll){
   const cardsHtml = pageItems.map(p => {
     const st = qtyStatus(p.qty);
     const size = extractSize(p.name);
+    const menuId = 'pm_' + p.id;
     return `<div class="pcard">
       <span class="pstatus ${st}">${statusLabel(st)}</span>
-      <div class="pimg${p.img?' clickable':''}" ${p.img?`data-lightbox="${toSrc(p.img_full||p.img)}"`:''}>${p.img?`<img src="${toSrc(p.img_full||p.img)}">`:'<div class="ph">🥤</div>'}</div>
-      <div class="pbody">
-        <div class="pcode">${p.erp_code||''}</div>
-        <div class="pname">${p.name||''}</div>
-        <div class="prow"><span>ขนาด</span><b>${size}</b></div>
-        <div class="prow"><span>สี</span><span><span class="colordot" style="background:${colorSwatch(p.color)}"></span>${p.color||'-'}</span></div>
-        ${isAll?`<div class="prow"><span>หมวดหมู่</span><b>${p.category}</b></div>`:''}
-        ${p.pending?`<div class="prow"><span>รอออเดอร์</span><b>${p.pending}</b></div>`:''}
-        ${p.incoming_qty?`<div class="prow"><span>กำลังสั่งเข้า</span><b>${Number(p.incoming_qty).toLocaleString()} ชิ้น</b></div>`:''}
-        ${p.arrival_date?`<div class="prow"><span>วันที่ของเข้า</span><b>${formatDateTH(p.arrival_date)}</b></div>`:''}
-        <div class="pqtyrow"><span class="qlabel">คงเหลือ</span><span class="qval ${st}">${(p.qty||0).toLocaleString()}</span></div>
-        ${canEdit?`<div class="pactions"><button data-act="edit" data-id="${p.id}">✎ แก้ไข</button><button class="danger" data-act="del" data-id="${p.id}">🗑 ลบ</button></div>`:''}
+      ${canEdit?`<button class="pkebab" data-kebab="${menuId}">⋮</button>
+      <div class="pkebabmenu" id="${menuId}">
+        <button data-act="edit" data-id="${p.id}">✎ แก้ไข</button>
+        <button class="danger" data-act="del" data-id="${p.id}">🗑 ลบ</button>
+      </div>`:''}
+      <div class="pcardtop">
+        <div class="pimg${p.img?' clickable':''}" ${p.img?`data-lightbox="${toSrc(p.img_full||p.img)}"`:''}>${p.img?`<img src="${toSrc(p.img_full||p.img)}">`:'<div class="ph">🥤</div>'}</div>
+        <div class="pinfo">
+          <div class="pcode">${p.erp_code||p.code||''}</div>
+          <div class="prow"><span>ขนาด</span><b>${size}</b></div>
+          <div class="prow"><span>สี</span><span><span class="colordot" style="background:${colorSwatch(p.color)}"></span>${p.color||'-'}</span></div>
+          <div class="prow"><span>รูปแบบ</span><b>${p.category||''}</b></div>
+        </div>
       </div>
+      <div class="stockbox">
+        <div class="stocktitle">จำนวนคงเหลือ</div>
+        <div class="prow"><span>คงเหลือ</span><b class="qty-${st}">${(p.qty||0).toLocaleString()} ชิ้น</b></div>
+        ${p.pending?`<div class="prow"><span>รอใช้ออเดอร์</span><b class="pendingval">${p.pending} ชิ้น</b></div>`:''}
+        ${p.incoming_qty?`<div class="prow"><span>รอเข้า</span><b class="incomingval">${Number(p.incoming_qty).toLocaleString()} ชิ้น</b></div>`:''}
+      </div>
+      ${p.arrival_date?`<div class="pfooter"><div class="datebadge"><span class="dot">📅</span>วันที่ของเข้า</div><b>${formatDateTH(p.arrival_date)}</b></div>`:''}
     </div>`;
   }).join('');
 
@@ -799,6 +820,9 @@ function renderCategory(catOrAll){
 
   $('mainContent').innerHTML = `
     <div class="pagehead"><h1>${isAll ? 'สต็อกสินค้าทั้งหมด' : catOrAll}</h1><div class="meta">รายการสต็อกสินค้า${isAll?'':': '+catOrAll}</div></div>
+    <div class="sectiontitle">ภาพรวมสต็อกสินค้า</div>
+    <div class="catcards">${buildCatOverviewCards(isAll ? null : catOrAll)}</div>
+    <div class="sectiontitle">รายการสต็อกสินค้า${isAll?'ทั้งหมด':': '+catOrAll}</div>
     <div class="toolbar">
       <input type="text" id="catsearch" placeholder="ค้นหารหัส / ชื่อรุ่น" value="${q}">
       <select id="sizeFilter"><option value="ALL">ขนาดทั้งหมด</option>${sizes.map(s=>`<option ${s===sizeF?'selected':''}>${s}</option>`).join('')}</select>
@@ -839,9 +863,24 @@ function renderCategory(catOrAll){
       const item = products.find(p => p.id === btn.dataset.id);
       if(btn.dataset.act === 'edit') openModal(item);
       else if(btn.dataset.act === 'del') deleteItem(item);
+      closeAllKebabMenus();
+    };
+  });
+  $('mainContent').querySelectorAll('[data-kebab]').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const menu = $(btn.dataset.kebab);
+      const isOpen = menu.classList.contains('show');
+      closeAllKebabMenus();
+      if(!isOpen) menu.classList.add('show');
     };
   });
 }
+
+function closeAllKebabMenus(){
+  document.querySelectorAll('.pkebabmenu.show').forEach(m => m.classList.remove('show'));
+}
+document.addEventListener('click', closeAllKebabMenus);
 
 $('search').oninput = () => {
   if(view==='settings') return;
