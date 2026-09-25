@@ -19,6 +19,7 @@
   --orange:#f5871f; --orange-soft:#fff1e2;
   --mint:#12b591; --mint-soft:#e1faf3;
   --slate:#64748b; --slate-soft:#eef1f5;
+  --purple:#8b5cf6; --purple-soft:#f0eaff;
   --sidebar:#ffffff;
 }
 @media (prefers-color-scheme: dark){
@@ -28,6 +29,7 @@
     --orange:#ff9f45; --orange-soft:#3a2a17;
     --mint:#2fe0b4; --mint-soft:#0f2e27;
     --slate:#9aa4b2; --slate-soft:#262b33;
+    --purple:#a78bfa; --purple-soft:#2a2140;
     --sidebar:#191b20;
   }
 }
@@ -37,6 +39,7 @@
   --orange:#ff9f45; --orange-soft:#3a2a17;
   --mint:#2fe0b4; --mint-soft:#0f2e27;
   --slate:#9aa4b2; --slate-soft:#262b33;
+  --purple:#a78bfa; --purple-soft:#2a2140;
   --sidebar:#191b20;
 }
 *{box-sizing:border-box;}
@@ -91,11 +94,14 @@ main{padding:20px calc(20px + env(safe-area-inset-right,0px)) 90px 20px;}
 .stat .icon{width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;}
 .stat.total .icon{background:var(--blue-soft); color:var(--blue);}
 .stat.qty .icon{background:var(--mint-soft); color:var(--mint);}
+.stat.pending .icon{background:var(--orange-soft); color:var(--orange);}
+.stat.incoming .icon{background:var(--purple-soft); color:var(--purple);}
 .stat.low .icon{background:var(--orange-soft); color:var(--orange);}
 .stat.zero .icon{background:var(--slate-soft); color:var(--slate);}
 .stat .label{font-size:11px; color:var(--sub);}
 .stat .value{font-size:20px; font-weight:800;}
 .stat.total .value{color:var(--blue);} .stat.qty .value{color:var(--mint);}
+.stat.pending .value{color:var(--orange);} .stat.incoming .value{color:var(--purple);}
 .stat.low .value{color:var(--orange);} .stat.zero .value{color:var(--slate);}
 
 .sectiontitle{font-size:14px; font-weight:700; margin:0 0 12px;}
@@ -259,7 +265,7 @@ main{padding:20px calc(20px + env(safe-area-inset-right,0px)) 90px 20px;}
     <div class="field"><label>จำนวนคงเหลือ</label><input type="number" id="f_qty"></div>
     <div class="field"><label>รอใช้ออเดอร์ (ถ้ามี)</label><input type="text" id="f_pending"></div>
     <div class="field"><label>กำลังสั่งเข้า (ชิ้น, ถ้ามี)</label><input type="number" id="f_incoming"></div>
-    <div class="field"><label>วันที่ของเข้า (ถ้ามี)</label><input type="text" id="f_arrival" placeholder="เช่น 25/07/2026"></div>
+    <div class="field"><label>วันที่ของเข้า (ถ้ามี)</label><input type="date" id="f_arrival"></div>
     <div class="field"><label>รูปภาพ</label>
       <div class="imgpick"><div class="prev" id="f_imgprev">🖼️</div><input type="file" id="f_imgfile" accept="image/*"></div>
     </div>
@@ -332,6 +338,12 @@ function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('sho
 function toSrc(v){ if(!v) return null; return v.startsWith('data:') ? v : 'data:image/jpeg;base64,'+v; }
 function qtyStatus(q){ if(!q || q<=0) return 'zero'; if(q<20) return 'low'; return 'ok'; }
 function statusLabel(s){ return s==='zero' ? 'รอเติมStock' : s==='low' ? 'เหลือน้อย' : 'พร้อมขาย'; }
+function formatDateTH(iso){
+  if(!iso) return '-';
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if(!m) return iso;
+  return `${m[3]}/${m[2]}/${m[1]}`;
+}
 function itemsFor(cat){ return products.filter(p=>p.category===cat); }
 
 function setView(v){ view = v; page = 1; $('search').value=''; renderNav(); render(); window.scrollTo(0,0); closeSidebarMobile(); }
@@ -384,6 +396,8 @@ function renderDashboard(){
   const totalQty = products.reduce((s,p)=>s+(p.qty||0),0);
   const low = products.filter(p=>qtyStatus(p.qty)==='low');
   const zero = products.filter(p=>qtyStatus(p.qty)==='zero');
+  const totalPending = products.reduce((s,p)=>s+(parseInt(p.pending)||0),0);
+  const totalIncoming = products.reduce((s,p)=>s+(parseInt(p.incoming_qty)||0),0);
   const now = new Date();
   const dateStr = now.toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
 
@@ -415,6 +429,8 @@ function renderDashboard(){
     <div class="stats">
       <div class="stat total"><div class="icon">📦</div><div><div class="label">จำนวนสินค้าทั้งหมด</div><div class="value">${products.length.toLocaleString()} <span class="unit">ใบ</span></div></div></div>
       <div class="stat qty"><div class="icon">🧮</div><div><div class="label">คงเหลือรวม</div><div class="value">${totalQty.toLocaleString()} <span class="unit">ใบ</span></div></div></div>
+      <div class="stat pending"><div class="icon">📑</div><div><div class="label">รอใช้ออเดอร์</div><div class="value">${totalPending.toLocaleString()} <span class="unit">ชิ้น</span></div></div></div>
+      <div class="stat incoming"><div class="icon">🚚</div><div><div class="label">กำลังสั่งเข้า</div><div class="value">${totalIncoming.toLocaleString()} <span class="unit">ชิ้น</span></div></div></div>
       <div class="stat low"><div class="icon">⚠️</div><div><div class="label">เหลือน้อย (&lt;20)</div><div class="value">${low.length.toLocaleString()} <span class="unit">รายการ</span></div></div></div>
       <div class="stat zero"><div class="icon">🔄</div><div><div class="label">รอเติม Stock</div><div class="value">${zero.length.toLocaleString()} <span class="unit">รายการ</span></div></div></div>
     </div>
@@ -457,7 +473,7 @@ function renderDashTable(){
       <td class="tqty ${st}">${(p.qty||0).toLocaleString()} ชิ้น</td>
       <td>${p.pending ? p.pending+' ชิ้น' : '-'}</td>
       <td>${p.incoming_qty ? Number(p.incoming_qty).toLocaleString()+' ชิ้น' : '-'}</td>
-      <td>${p.arrival_date || '-'}</td>
+      <td>${formatDateTH(p.arrival_date)}</td>
       <td><span class="pstatus ${st}" style="position:static">${statusLabel(st)}</span></td>
       ${canEdit?`<td><div style="display:flex;gap:5px;"><button class="iconbtn" data-act="edit" data-id="${p.id}">✎</button><button class="iconbtn danger" data-act="del" data-id="${p.id}">🗑</button></div></td>`:''}
     </tr>`;
@@ -610,6 +626,8 @@ function renderCategory(catOrAll){
         <div class="prow"><span>สี</span><span><span class="colordot" style="background:${colorSwatch(p.color)}"></span>${p.color||'-'}</span></div>
         ${isAll?`<div class="prow"><span>หมวดหมู่</span><b>${p.category}</b></div>`:''}
         ${p.pending?`<div class="prow"><span>รอออเดอร์</span><b>${p.pending}</b></div>`:''}
+        ${p.incoming_qty?`<div class="prow"><span>กำลังสั่งเข้า</span><b>${Number(p.incoming_qty).toLocaleString()} ชิ้น</b></div>`:''}
+        ${p.arrival_date?`<div class="prow"><span>วันที่ของเข้า</span><b>${formatDateTH(p.arrival_date)}</b></div>`:''}
         <div class="pqtyrow"><span class="qlabel">คงเหลือ</span><span class="qval ${st}">${(p.qty||0).toLocaleString()}</span></div>
         ${canEdit?`<div class="pactions"><button data-act="edit" data-id="${p.id}">✎ แก้ไข</button><button class="danger" data-act="del" data-id="${p.id}">🗑 ลบ</button></div>`:''}
       </div>
