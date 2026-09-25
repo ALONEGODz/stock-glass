@@ -81,8 +81,8 @@ main{padding:20px calc(20px + env(safe-area-inset-right,0px)) 90px 20px;}
 .catcard .catstats b{color:var(--text);}
 .catcard button{margin-top:6px; width:100%; font-size:12px; padding:7px; border-radius:8px; border:1px solid var(--mint); background:var(--mint-soft); color:var(--mint); font-weight:700; cursor:pointer;}
 
-.alerttable{background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:10px;}
-.alerttable table{width:100%; border-collapse:collapse; font-size:12.5px;}
+.alerttable{background:var(--card); border:1px solid var(--border); border-radius:14px; overflow-x:auto; margin-bottom:10px;}
+.alerttable table{width:100%; border-collapse:collapse; font-size:12.5px; min-width:760px;}
 .alerttable th{text-align:left; padding:10px 12px; font-size:10.5px; color:var(--sub); text-transform:uppercase; background:var(--bg); border-bottom:1px solid var(--border);}
 .alerttable td{padding:9px 12px; border-bottom:1px solid var(--border);}
 .alerttable tr:last-child td{border-bottom:none;}
@@ -109,6 +109,16 @@ main{padding:20px calc(20px + env(safe-area-inset-right,0px)) 90px 20px;}
 .prow{display:flex; justify-content:space-between; font-size:11.5px; color:var(--sub);}
 .prow b{color:var(--text); font-weight:700;}
 .colordot{display:inline-block; width:9px; height:9px; border-radius:999px; margin-right:5px; border:1px solid rgba(0,0,0,.15); vertical-align:middle;}
+.dashtoolbar{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;}
+.dashtoolbar select{font-size:13px; padding:8px 10px; border-radius:9px; border:1px solid var(--border); background:var(--card); color:var(--text);}
+.dashthumb{width:44px; height:44px; border-radius:8px; overflow:hidden; background:var(--bg); border:1px solid var(--border);}
+.dashthumb.clickable{cursor:zoom-in;}
+.dashthumb img{width:100%; height:100%; object-fit:cover;}
+.dashthumb .ph{font-size:16px; color:var(--sub); display:flex; align-items:center; justify-content:center; height:100%;}
+.tqty{font-weight:700; white-space:nowrap;}
+.tqty.ok{color:var(--mint);} .tqty.low{color:var(--orange);} .tqty.zero{color:var(--slate);}
+.iconbtn{width:28px; height:28px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); cursor:pointer; font-size:12px; display:inline-flex; align-items:center; justify-content:center;}
+.iconbtn.danger{color:#e5484d; border-color:#e5484d;}
 .pqtyrow{display:flex; justify-content:space-between; align-items:baseline; padding-top:4px; margin-top:2px; border-top:1px dashed var(--border);}
 .pqtyrow .qlabel{font-size:11px; color:var(--sub);}
 .pqtyrow .qval{font-size:18px; font-weight:800;}
@@ -210,6 +220,8 @@ main{padding:20px calc(20px + env(safe-area-inset-right,0px)) 90px 20px;}
     <div class="field"><label>สี</label><input type="text" id="f_color"></div>
     <div class="field"><label>จำนวนคงเหลือ</label><input type="number" id="f_qty"></div>
     <div class="field"><label>รอใช้ออเดอร์ (ถ้ามี)</label><input type="text" id="f_pending"></div>
+    <div class="field"><label>กำลังสั่งเข้า (ชิ้น, ถ้ามี)</label><input type="number" id="f_incoming"></div>
+    <div class="field"><label>วันที่ของเข้า (ถ้ามี)</label><input type="text" id="f_arrival" placeholder="เช่น 25/07/2026"></div>
     <div class="field"><label>รูปภาพ</label>
       <div class="imgpick"><div class="prev" id="f_imgprev">🖼️</div><input type="file" id="f_imgfile" accept="image/*"></div>
     </div>
@@ -345,16 +357,6 @@ function renderDashboard(){
     </div>`;
   }).join('');
 
-  const alertItems = products.filter(p=>qtyStatus(p.qty)!=='ok').sort((a,b)=>(a.qty||0)-(b.qty||0)).slice(0,8);
-  const alertHtml = alertItems.length ? `
-    <div class="alerttable"><table>
-      <thead><tr><th>รหัสสินค้า</th><th>ชื่อ/ขนาด</th><th>หมวดหมู่</th><th>สี</th><th>คงเหลือ</th><th>สถานะ</th></tr></thead>
-      <tbody>${alertItems.map(p=>{const st=qtyStatus(p.qty); return `<tr>
-        <td class="pcode">${p.erp_code||p.code||''}</td><td>${p.name||''}</td><td>${p.category}</td><td>${p.color||''}</td>
-        <td><b>${(p.qty||0).toLocaleString()}</b></td>
-        <td><span class="pstatus ${st}" style="position:static">${statusLabel(st)}</span></td></tr>`;}).join('')}</tbody>
-    </table></div>` : `<div class="empty">ไม่มีรายการที่ต้องเฝ้าระวังตอนนี้ 🎉</div>`;
-
   $('mainContent').innerHTML = `
     <div class="pagehead"><h1>แดชบอร์ด</h1><div class="meta">อัปเดตล่าสุด ${dateStr}</div></div>
     <div class="howto">${HOWTO_TEXT}</div>
@@ -366,10 +368,95 @@ function renderDashboard(){
     </div>
     <div class="sectiontitle">ภาพรวมสต๊อกตามหมวดหมู่</div>
     <div class="catcards">${catCardsHtml}</div>
-    <div class="sectiontitle">รายการที่ควรเฝ้าระวัง</div>
-    ${alertHtml}
+    <div class="sectiontitle">รายการสต็อกสินค้าทั้งหมด</div>
+    <div id="dashTableWrap"></div>
   `;
   $('mainContent').querySelectorAll('[data-goto]').forEach(b => b.onclick = () => setView(b.dataset.goto));
+  renderDashTable();
+}
+
+let dashPage = 1, dashPageSize = 10, dashCatFilter = 'ALL', dashStatusFilter = 'ALL';
+
+function renderDashTable(){
+  const q = $('search').value.trim().toLowerCase();
+  let items = products;
+  if(q) items = items.filter(p => (p.code||'').toLowerCase().includes(q) || (p.erp_code||'').toLowerCase().includes(q) || (p.name||'').toLowerCase().includes(q) || (p.color||'').toLowerCase().includes(q));
+  if(dashCatFilter !== 'ALL') items = items.filter(p => p.category === dashCatFilter);
+  if(dashStatusFilter !== 'ALL') items = items.filter(p => qtyStatus(p.qty) === dashStatusFilter);
+
+  const totalPages = Math.max(1, Math.ceil(items.length / dashPageSize));
+  if(dashPage > totalPages) dashPage = totalPages;
+  const pageItems = items.slice((dashPage-1)*dashPageSize, dashPage*dashPageSize);
+
+  const rows = pageItems.map(p => {
+    const st = qtyStatus(p.qty);
+    const size = extractSize(p.name);
+    return `<tr>
+      <td><div class="pcode">${p.erp_code||''}</div><div class="pcode" style="opacity:.7">${p.code||''}</div></td>
+      <td><div class="dashthumb${p.img?' clickable':''}" ${p.img?`data-lightbox="${toSrc(p.img_full||p.img)}"`:''}>${p.img?`<img src="${toSrc(p.img)}">`:'<div class="ph">🥤</div>'}</div></td>
+      <td><span class="colordot" style="background:${colorSwatch(p.color)}"></span>${p.color||'-'}</td>
+      <td>${size}</td>
+      <td class="tqty ${st}">${(p.qty||0).toLocaleString()} ชิ้น</td>
+      <td>${p.pending ? p.pending+' ชิ้น' : '-'}</td>
+      <td>${p.incoming_qty ? Number(p.incoming_qty).toLocaleString()+' ชิ้น' : '-'}</td>
+      <td>${p.arrival_date || '-'}</td>
+      <td><span class="pstatus ${st}" style="position:static">${statusLabel(st)}</span></td>
+      ${canEdit?`<td><div style="display:flex;gap:5px;"><button class="iconbtn" data-act="edit" data-id="${p.id}">✎</button><button class="iconbtn danger" data-act="del" data-id="${p.id}">🗑</button></div></td>`:''}
+    </tr>`;
+  }).join('');
+
+  const pagerHtml = `
+    <div class="pager">
+      <div>แสดง ${items.length ? ((dashPage-1)*dashPageSize+1) : 0}-${Math.min(dashPage*dashPageSize,items.length)} จาก ${items.length} รายการ</div>
+      <div class="pages">
+        <button id="dashPrev" ${dashPage<=1?'disabled':''}>‹</button>
+        ${Array.from({length: totalPages}, (_,i)=>i+1).filter(n => n===1||n===totalPages||Math.abs(n-dashPage)<=1).reduce((acc,n,i,arr)=>{
+          if(i>0 && n-arr[i-1]>1) acc += `<span>…</span>`;
+          acc += `<button data-dpage="${n}" class="${n===dashPage?'active':''}">${n}</button>`;
+          return acc;
+        },'')}
+        <button id="dashNext" ${dashPage>=totalPages?'disabled':''}>›</button>
+      </div>
+      <div>แสดงต่อ <select id="dashPageSizeSel">${[10,20,50,100].map(n=>`<option value="${n}" ${n===dashPageSize?'selected':''}>${n}</option>`).join('')}</select></div>
+    </div>`;
+
+  $('dashTableWrap').innerHTML = `
+    <div class="dashtoolbar">
+      <select id="dashCatFilter"><option value="ALL">ทุกหมวดหมู่</option>${CATEGORIES.map(c=>`<option ${c===dashCatFilter?'selected':''}>${c}</option>`).join('')}</select>
+      <select id="dashStatusFilter">
+        <option value="ALL" ${dashStatusFilter==='ALL'?'selected':''}>สถานะทั้งหมด</option>
+        <option value="ok" ${dashStatusFilter==='ok'?'selected':''}>พร้อมขาย</option>
+        <option value="low" ${dashStatusFilter==='low'?'selected':''}>เหลือน้อย</option>
+        <option value="zero" ${dashStatusFilter==='zero'?'selected':''}>รอเติม Stock</option>
+      </select>
+    </div>
+    ${pageItems.length ? `
+    <div class="alerttable"><table>
+      <thead><tr>
+        <th>รหัสสินค้า</th><th>รูปแบบ</th><th>สี</th><th>ขนาด</th><th>คงเหลือ</th>
+        <th>รอใช้ออเดอร์</th><th>กำลังสั่งเข้า</th><th>วันที่ของเข้า</th><th>สถานะ</th>${canEdit?'<th>จัดการ</th>':''}
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+    ${pagerHtml}` : `<div class="empty">ไม่พบสินค้า</div>`}
+  `;
+
+  $('dashCatFilter').onchange = (e) => { dashCatFilter = e.target.value; dashPage = 1; renderDashTable(); };
+  $('dashStatusFilter').onchange = (e) => { dashStatusFilter = e.target.value; dashPage = 1; renderDashTable(); };
+  const dpss = $('dashPageSizeSel');
+  if(dpss) dpss.onchange = () => { dashPageSize = parseInt(dpss.value); dashPage = 1; renderDashTable(); };
+  $('mainContent').querySelectorAll('[data-dpage]').forEach(b => b.onclick = () => { dashPage = parseInt(b.dataset.dpage); renderDashTable(); });
+  const dprev = $('dashPrev'), dnext = $('dashNext');
+  if(dprev) dprev.onclick = () => { if(dashPage>1){ dashPage--; renderDashTable(); } };
+  if(dnext) dnext.onclick = () => { dashPage++; renderDashTable(); };
+  $('mainContent').querySelectorAll('.dashthumb.clickable').forEach(el => el.onclick = () => openLightbox(el.dataset.lightbox));
+  $('mainContent').querySelectorAll('button[data-act]').forEach(btn => {
+    btn.onclick = () => {
+      const item = products.find(p => p.id === btn.dataset.id);
+      if(btn.dataset.act === 'edit') openModal(item);
+      else if(btn.dataset.act === 'del') deleteItem(item);
+    };
+  });
 }
 
 const HOWTO_TEXT = '<b>วิธีใช้:</b> ดูสต๊อกได้ทุกคนโดยไม่ต้องล็อกอิน · พนักงานที่ต้องการแก้ไข ให้กด "เข้าสู่ระบบเพื่อแก้ไข" ด้วย Gmail แล้วรอผู้ดูแลเพิ่มสิทธิ์ให้ · คลิกรูปภาพเพื่อดูขนาดเต็ม · ข้อมูลอัปเดตแบบเรียลไทม์';
@@ -519,7 +606,11 @@ function renderCategory(catOrAll){
   });
 }
 
-$('search').oninput = () => { if(view==='dashboard' || view==='settings') return; page = 1; renderCategory(view); };
+$('search').oninput = () => {
+  if(view==='settings') return;
+  if(view==='dashboard'){ dashPage = 1; renderDashTable(); return; }
+  page = 1; renderCategory(view);
+};
 
 function openLightbox(src){
   const lb = document.createElement('div');
@@ -541,6 +632,8 @@ function openModal(item, presetCategory){
   $('f_color').value = item ? item.color : '';
   $('f_qty').value = item ? item.qty : 0;
   $('f_pending').value = item ? item.pending : '';
+  $('f_incoming').value = item && item.incoming_qty ? item.incoming_qty : '';
+  $('f_arrival').value = item && item.arrival_date ? item.arrival_date : '';
   $('f_imgfile').value = '';
   const imgSrc = toSrc(item && item.img);
   $('f_imgprev').innerHTML = imgSrc ? `<img src="${imgSrc}">` : '🖼️';
@@ -590,6 +683,8 @@ $('saveBtn').onclick = async () => {
     color: $('f_color').value.trim(),
     qty: parseInt($('f_qty').value) || 0,
     pending: $('f_pending').value.trim(),
+    incoming_qty: $('f_incoming').value ? parseInt($('f_incoming').value) : null,
+    arrival_date: $('f_arrival').value.trim() || null,
     img: $('f_imgprev').dataset.b64 || null,
     img_full: $('f_imgprev').dataset.b64full || null,
     updatedAt: Date.now(),
