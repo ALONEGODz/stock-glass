@@ -213,7 +213,7 @@ main{padding:20px calc(20px + env(safe-area-inset-right,0px)) 90px 20px;}
 .addeditor button{padding:8px 12px; border-radius:7px; border:none; background:var(--blue); color:var(--blue-ink); font-size:12px; cursor:pointer;}
 .seedbtn{padding:9px 14px; border-radius:8px; border:none; background:var(--mint); color:#04231a; cursor:pointer; margin-bottom:10px; font-weight:700;}
 
-.fab{position:fixed; right:16px; bottom:20px; background:var(--blue); color:var(--blue-ink); border:none; border-radius:999px; padding:13px 18px; font-size:14px; font-weight:700; box-shadow:0 4px 14px rgba(0,0,0,.25); cursor:pointer; z-index:6;}
+.fab{position:fixed; left:calc(220px + 16px); bottom:20px; background:var(--blue); color:var(--blue-ink); border:none; border-radius:999px; padding:13px 18px; font-size:14px; font-weight:700; box-shadow:0 4px 14px rgba(0,0,0,.25); cursor:pointer; z-index:6;}
 
 .overlay{position:fixed; inset:0; background:rgba(20,22,26,.6); display:flex; align-items:flex-end; justify-content:center; z-index:30;}
 @media (min-width:640px){ .overlay{align-items:center;} }
@@ -246,6 +246,7 @@ main{padding:20px calc(20px + env(safe-area-inset-right,0px)) 90px 20px;}
   .sidebar-overlay.show{display:block; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:14;}
   .topbar input[type=text]{max-width:none;}
   .herocta{font-size:11px; padding:8px 14px;}
+  .fab{left:16px;}
 }
 </style>
 </head>
