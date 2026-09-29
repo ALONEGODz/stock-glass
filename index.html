@@ -913,6 +913,7 @@ function renderCategory(catOrAll){
   const addBtn = $('addNewBtn');
   if(addBtn) addBtn.onclick = () => openModal(null, isAll ? CATEGORIES[0] : catOrAll);
 
+  $('mainContent').querySelectorAll('[data-goto]').forEach(b => b.onclick = () => setView(b.dataset.goto));
   $('mainContent').querySelectorAll('.pimg.clickable').forEach(el => el.onclick = () => openLightbox(el.dataset.lightbox));
   $('mainContent').querySelectorAll('button[data-act]').forEach(btn => {
     btn.onclick = () => {
