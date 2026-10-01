@@ -689,6 +689,16 @@ function renderDashTable(){
 
 const HOWTO_TEXT = '<b>วิธีใช้:</b> ดูสต๊อกได้ทุกคนโดยไม่ต้องล็อกอิน · พนักงานที่ต้องการแก้ไข ให้กด "เข้าสู่ระบบเพื่อแก้ไข" ด้วย Gmail แล้วรอผู้ดูแลเพิ่มสิทธิ์ให้ · คลิกรูปภาพเพื่อดูขนาดเต็ม · ข้อมูลอัปเดตแบบเรียลไทม์';
 
+function findDuplicateCodes(){
+  const byCode = {};
+  products.forEach(p => {
+    const code = (p.erp_code || p.code || '').trim();
+    if(!code) return;
+    (byCode[code] = byCode[code] || []).push(p);
+  });
+  return Object.entries(byCode).filter(([code, items]) => items.length > 1);
+}
+
 async function renderSettings(){
   let editorsHtml = '';
   if(isSuperAdmin){
@@ -704,6 +714,17 @@ async function renderSettings(){
         <div class="addeditor"><input type="email" id="newEditorEmail" placeholder="อีเมล Gmail ของพนักงาน"><button id="addEditorBtn">เพิ่มสิทธิ์แก้ไข</button></div>
       </div>`;
   }
+  const dupes = findDuplicateCodes();
+  const dupesHtml = dupes.length ? `
+    <div class="alerttable" style="overflow-x:auto;"><table style="min-width:0;">
+      <thead><tr><th>รหัสที่ซ้ำกัน</th><th>สินค้าที่ใช้รหัสนี้</th></tr></thead>
+      <tbody>${dupes.map(([code, items]) => `<tr>
+        <td class="pcode">${code}</td>
+        <td>${items.map(p => `${p.category} — ${p.name||''}${p.color?(' ('+p.color+')'):''}`).join('<br>')}</td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+  ` : `<div class="empty">ไม่พบรหัสสินค้าซ้ำกัน 🎉</div>`;
+
   $('mainContent').innerHTML = `
     <div class="pagehead"><h1>ตั้งค่า</h1></div>
     ${editorsHtml}
@@ -711,6 +732,11 @@ async function renderSettings(){
       <h3>ส่งออกข้อมูลสต๊อก</h3>
       <p>ดาวน์โหลดรายการสินค้าทั้งหมดเป็นไฟล์ CSV เพื่อเปิดใน Excel</p>
       <button class="exportbtn" id="exportBtn">⬇ ส่งออก CSV</button>
+    </div>
+    <div class="settingsbox" style="max-width:720px;">
+      <h3>ตรวจสอบรหัสสินค้าซ้ำ</h3>
+      <p>รหัสสินค้า (ERP/รหัสสินค้า) ที่ซ้ำกันระหว่าง 2 ชิ้นขึ้นไป เป็นสาเหตุหลักที่ทำให้ "จำนวนรุ่น" นับได้น้อยกว่าความเป็นจริง เพราะระบบจะนับรวมเป็นรุ่นเดียวกัน แก้ไขรหัสให้ไม่ซ้ำกันเพื่อให้นับถูกต้อง</p>
+      ${dupesHtml}
     </div>`;
   $('exportBtn').onclick = exportCSV;
   const seedBtn = $('seedBtn');
