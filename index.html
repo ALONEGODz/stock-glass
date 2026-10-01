@@ -716,7 +716,7 @@ async function renderSettings(){
   }
   const dupes = findDuplicateCodes();
   const dupesHtml = dupes.length ? `
-    <div class="alerttable" style="overflow-x:auto;"><table style="min-width:0;">
+    <div class="alerttable"><table style="min-width:0;">
       <thead><tr><th>รหัสที่ซ้ำกัน</th><th>สินค้าที่ใช้รหัสนี้</th></tr></thead>
       <tbody>${dupes.map(([code, items]) => `<tr>
         <td class="pcode">${code}</td>
